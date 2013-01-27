@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Proyecto Redes 1
+PROJECTNAME=Proyecto-Redes
 
 # Active Configuration
 DEFAULTCONF=Debug
