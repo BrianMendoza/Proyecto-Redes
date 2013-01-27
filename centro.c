@@ -85,10 +85,10 @@ int main(int argc, char** argv) {
             }
             i = i+2;
         }
-        
+
         while (capacidadMax < inventario) {
         	printf("Inventario excede capacidad, intente de nuevo: ");
-		char temp3[sizeof(int)];
+		char temp3[sizeof(long)];
 		char *p;
 		fgets(temp3, sizeof(temp3), stdin);
 		if ((p = strchr(temp3, '\n')) != NULL)
