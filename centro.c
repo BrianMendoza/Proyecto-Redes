@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
                 }            }
             if (strcmp(temp, "-p") == 0) {
                 temp2 = atoi(argv[i+1]);
-                if (1 <= temp2 && temp2 <= 60000)
+                if (1 <= temp2 && temp2 <= 65535)
                         puerto = temp2;
                 else {
                     printf("Usage: Puerto invalido\n");
@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 		inventario = atoi(temp3);
         }
         
-        printf("%s %d %d %d %d %d",nombre,capacidadMax,inventario,tiempo,suministro,puerto);
+        printf("%s %d %d %d %d %d\n",nombre,capacidadMax,inventario,tiempo,suministro,puerto);
     return (EXIT_SUCCESS);
 }
 
