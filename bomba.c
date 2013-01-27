@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
                     while((capacMax < 38000) || (capacMax > 380000)){
                         printf("Usage: La capacidad máxima debe ser un valor"
                                 " entre 38000 y 380000. Intente de nuevo: ");
-                        char temp[sizeof(int)];
+                        char temp[sizeof(long)];
                         char *p;
                         fgets(temp,sizeof(temp),stdin);
                         if((p = strchr(temp, '\n')) != NULL){
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
                     while((consumo < 0) || (consumo > 1000)){
                         printf("Usage: El consumo promedio debe ser un valor"
                                 " entre 0 y 1000. Intente de nuevo: ");
-                        char temp[sizeof(int)];
+                        char temp[sizeof(long)];
                         char *p;
                         fgets(temp,sizeof(temp),stdin);
                         if((p = strchr(temp, '\n')) != NULL){
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     while((inventario < 0) || (inventario > capacMax)){
         printf("Usage: El inventario debe tener un valor entre 0 y la capacidad "
                 "máxima. Intente de nuevo: ");
-        char temp[sizeof(int)];
+        char temp[sizeof(long)];
         char *p;
         fgets(temp,sizeof(temp),stdin);
         if((p = strchr(temp, '\n')) != NULL){
