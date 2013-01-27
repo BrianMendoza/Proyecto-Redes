@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
                 if(strcmp(temp,"-cp") == 0) {
                     capacMax = atoi(argv[i+1]);
                     while((capacMax < 38000) || (capacMax > 380000)){
-                        printf("Usage: Debe colocar un valor entre 38000 y 380000 ");
-                        printf("Intente de nuevo: ");
+                        printf("Usage: La capacidad máxima debe ser un valor"
+                                " entre 38000 y 380000. Intente de nuevo: ");
                         char temp[sizeof(int)];
                         char *p;
                         fgets(temp,sizeof(temp),stdin);
@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
                 if(strcmp(temp,"-c") == 0) {
                     consumo = atoi(argv[i+1]);
                     while((consumo < 0) || (consumo > 1000)){
-                        printf("Usage: Debe colocar un valor entre 0 y 1000. "
-                                "Intente de nuevo: ");
+                        printf("Usage: El consumo promedio debe ser un valor"
+                                " entre 0 y 1000. Intente de nuevo: ");
                         char temp[sizeof(int)];
                         char *p;
                         fgets(temp,sizeof(temp),stdin);
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
         i = i + 2;
     }
     while((inventario < 0) || (inventario > capacMax)){
-        printf("Usage: El iventario debe tener un valor entre 0 y la capacidad "
+        printf("Usage: El inventario debe tener un valor entre 0 y la capacidad "
                 "máxima. Intente de nuevo: ");
         char temp[sizeof(int)];
         char *p;
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
         inventario = atoi(temp);
     }    
     
-   
+    printf("%s,%d,%d,%d,%s\n",nombreBomba,capacMax,inventario, consumo, centros);
     return (EXIT_SUCCESS);
 }
 
