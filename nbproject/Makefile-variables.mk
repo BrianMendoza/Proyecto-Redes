@@ -9,16 +9,16 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=proyecto_redes_1
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/proyecto_redes_1
+CND_ARTIFACT_NAME_Debug=proyectoredes1
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/proyectoredes1
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
 CND_PACKAGE_NAME_Debug=proyectoredes1.tar
 CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/proyectoredes1.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=proyecto_redes_1
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/proyecto_redes_1
+CND_ARTIFACT_NAME_Release=proyectoredes1
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/proyectoredes1
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
 CND_PACKAGE_NAME_Release=proyectoredes1.tar
 CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/proyectoredes1.tar

@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
             }
             if (strcmp(temp, "-i") == 0) {
                 temp2 = atoi(argv[i+1]);
-                if (0 <= temp2 && temp2 <= capacidadMax)
+                if (0 <= temp2 && temp2 <= 3800000)
                         inventario = temp2;
                 else {
                     printf("Usage: Inventario invalido\n");
@@ -52,26 +52,26 @@ int main(int argc, char** argv) {
                 }            }
             if (strcmp(temp, "-t") == 0) {
                 temp2 = atoi(argv[i+1]);
-                if (38000 <= temp2 && temp2 <= 3800000)
-                        capacidadMax = temp2;
+                if (0 <= temp2 && temp2 <= 180)
+                        tiempo = temp2;
                 else {
-                    printf("Usage: Capacidad invalida\n");
+                    printf("Usage: Tiempo invalido\n");
                     exit(1);
                 }            }
             if (strcmp(temp, "-s") == 0) {
                 temp2 = atoi(argv[i+1]);
-                if (38000 <= temp2 && temp2 <= 3800000)
-                        capacidadMax = temp2;
+                if (0 <= temp2 && temp2 <= 10000)
+                        suministro = temp2;
                 else {
-                    printf("Usage: Capacidad invalida\n");
+                    printf("Usage: Suministro invalido\n");
                     exit(1);
                 }            }
             if (strcmp(temp, "-p") == 0) {
                 temp2 = atoi(argv[i+1]);
-                if (38000 <= temp2 && temp2 <= 3800000)
-                        capacidadMax = temp2;
+                if (1 <= temp2 && temp2 <= 60000)
+                        puerto = temp2;
                 else {
-                    printf("Usage: Capacidad invalida\n");
+                    printf("Usage: Puerto invalido\n");
                     exit(1);
                 }            }
             if (strcmp(temp, "-n") != 0 &&
@@ -86,7 +86,17 @@ int main(int argc, char** argv) {
             i = i+2;
         }
         
-        printf();
+        while (capacidadMax < inventario) {
+        	printf("Inventario excede capacidad, intente de nuevo: ");
+		char temp3[sizeof(int)];
+		char *p;
+		fgets(temp3, sizeof(temp3), stdin);
+		if ((p = strchr(temp3, '\n')) != NULL)
+		{*p = '\0';}
+		inventario = atoi(temp3);
+        }
+        
+        printf("%s %d %d %d %d %d",nombre,capacidadMax,inventario,tiempo,suministro,puerto);
     return (EXIT_SUCCESS);
 }
 

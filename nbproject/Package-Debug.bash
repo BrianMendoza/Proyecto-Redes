@@ -12,8 +12,8 @@ CND_DISTDIR=dist
 CND_BUILDDIR=build
 NBTMPDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/proyecto_redes_1
-OUTPUT_BASENAME=proyecto_redes_1
+OUTPUT_PATH=${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/proyectoredes1
+OUTPUT_BASENAME=proyectoredes1
 PACKAGE_TOP_DIR=proyectoredes1/
 
 # Functions
