@@ -9,8 +9,7 @@
 #include <stdlib.h>
 
 /*
- * test hola
- * chao
+ * test 
  */
 int main(int argc, char** argv) {
 
