@@ -9,6 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    char *nombre;
+    char *direccion;
+    int puerto;
+} nodo;
+
 /*
  * test 
  */
@@ -82,6 +88,16 @@ int main(int argc, char** argv) {
     }    
     
     printf("%s,%d,%d,%d,%s\n",nombreBomba,capacMax,inventario, consumo, centros);
+    
+    FILE *file = NULL;
+    file = fopen(centros,"r");
+    
+    if (file != NULL) {
+    
+    } else {
+        perror("Error al abrir el archivo");
+	exit(1);
+    }
     return (EXIT_SUCCESS);
 }
 
