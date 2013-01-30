@@ -34,9 +34,9 @@ void obtenerCentros(Nodo lista[], FILE* f) {
     while (fgets(str, sizeof(str), f) != NULL) {
         if ( str[0] != '\n' ) {
                 pch = strtok (str,"&&");
-                strcpy(lista[i].nombre,pch);
+                sprintf(lista[i].nombre,"%s",pch);
                 pch = strtok (NULL, "&&");
-                strcpy(lista[i].direccion,pch);
+                sprintf(lista[i].direccion,"%s",pch);
                 pch = strtok (NULL, "&&");
                 lista[i].puerto = atoi(pch);
                 ++i;

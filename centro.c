@@ -73,6 +73,27 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     return;
 }
 
+void iniciarSimulacion(char* n,int cp, int i, int t, int s, int p) {
+    int count = 0;
+    FILE *file;
+    char str[BUFSIZ];
+    sprintf(str,"log_%s.txt",n);
+    file = fopen(str,"w");
+    if (file != NULL) {
+        fprintf(file,"Estado inicial: %d\n\n",i);
+        while(count < 480) {
+            if (i+s < cp)
+                i = i + s;
+            else {
+                i = cp;
+                fprintf(file,"Tanque full: minuto %d\n\n",count);
+            }
+            ++count;
+            usleep(100*1000);
+        }
+        fclose(file);
+    }
+}
 /*
  * test
  */
@@ -118,6 +139,9 @@ int main(int argc, char** argv) {
         }
         
         checkEntrada(&capacidadMax,&inventario,&tiempo,&suministro,&puerto);
+        
+        iniciarSimulacion(nombre,capacidadMax,inventario,
+                                tiempo,suministro,puerto);
         
     return (EXIT_SUCCESS);
 }
