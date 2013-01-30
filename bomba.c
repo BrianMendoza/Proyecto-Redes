@@ -10,11 +10,40 @@
 #include <string.h>
 
 typedef struct {
-    char *nombre;
-    char *direccion;
+    char nombre[BUFSIZ];
+    char direccion[BUFSIZ];
     int puerto;
-} nodo;
+} Nodo;
 
+int contarLineas(FILE* f) {
+    int count = 0;
+    char linea[BUFSIZ];
+    while ( fgets(linea, sizeof linea, f) ) {
+        if ( linea[0] != '\n' )
+            ++count;
+    }
+    printf("%d lines\n",count);
+    return count;
+}
+
+void obtenerCentros(Nodo lista[], FILE* f) {
+    int size = sizeof(lista);
+    int i = 0;
+    char str[BUFSIZ];
+    char * pch;
+    while (fgets(str, sizeof(str), f) != NULL) {
+        if ( str[0] != '\n' ) {
+                pch = strtok (str,"&&");
+                strcpy(lista[i].nombre,pch);
+                pch = strtok (NULL, "&&");
+                strcpy(lista[i].direccion,pch);
+                pch = strtok (NULL, "&&");
+                lista[i].puerto = atoi(pch);
+                ++i;
+        }
+    }
+    return;
+}
 /*
  * test 
  */
@@ -91,13 +120,29 @@ int main(int argc, char** argv) {
     
     FILE *file = NULL;
     file = fopen(centros,"r");
+    int numCentros = 0;
     
     if (file != NULL) {
-    
+        numCentros = contarLineas(file);
     } else {
         perror("Error al abrir el archivo");
 	exit(1);
     }
+    
+    rewind(file);
+   // printf("%d lineas\n",numCentros);
+    Nodo listaCentros[numCentros];
+
+    obtenerCentros(listaCentros,file);
+    
+    fclose(file);
+    
+    int j = 0;
+    while (j<numCentros) {
+        printf("%s, %s, %d\n",listaCentros[j].nombre,listaCentros[j].direccion,listaCentros[j].puerto);
+        ++j;
+    }
+    
     return (EXIT_SUCCESS);
 }
 
