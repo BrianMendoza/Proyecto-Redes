@@ -130,18 +130,9 @@ int main(int argc, char** argv) {
     }
     
     rewind(file);
-   // printf("%d lineas\n",numCentros);
     Nodo listaCentros[numCentros];
-
     obtenerCentros(listaCentros,file);
-    
     fclose(file);
-    
-    int j = 0;
-    while (j<numCentros) {
-        printf("%s, %s, %d\n",listaCentros[j].nombre,listaCentros[j].direccion,listaCentros[j].puerto);
-        ++j;
-    }
     
     return (EXIT_SUCCESS);
 }
