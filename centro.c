@@ -92,7 +92,11 @@ void iniciarSimulacion(char* n,int cp, int i, int t, int s, int p) {
             usleep(100*1000);
         }
         fclose(file);
+    } else {
+        perror("Error al crear el archivo");
+        exit(1);
     }
+    return;
 }
 /*
  * test
