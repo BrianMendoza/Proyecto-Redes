@@ -15,6 +15,39 @@ typedef struct {
     int puerto;
 } Nodo;
 
+void checkEntrada(int *cp,int *i,int *c) {
+    char temp[2*sizeof(long)];
+    char *p;
+    
+    while (38000 > *cp || *cp > 380000) {
+        printf("Usage: La capacidad máxima debe ser un valor"
+                        " entre 38000 y 380000. Intente de nuevo: ");
+        fgets(temp,sizeof(temp),stdin);
+        if((p = strchr(temp, '\n')) != NULL)
+                *p = '\0';
+        *cp = atoi(temp);
+    }
+    
+    while (0 > *i || *i > *cp) {
+        printf("Usage: el inventario debe ser un valor"
+                        " entre 0 y %d. Intente de nuevo: ",*cp);
+        fgets(temp,sizeof(temp),stdin);
+        if((p = strchr(temp, '\n')) != NULL)
+                *p = '\0';
+        *i = atoi(temp);
+    }
+    
+    while (0 > *c || *c > 1000) {
+        printf("Usage: El consumo debe ser un valor"
+                        " entre 0 y 1000. Intente de nuevo: ");
+        fgets(temp,sizeof(temp),stdin);
+        if((p = strchr(temp, '\n')) != NULL)
+                *p = '\0';
+        *c = atoi(temp);
+    }
+    
+    return;
+}
 int contarLineas(FILE* f) {
     int count = 0;
     char linea[BUFSIZ];
@@ -22,7 +55,6 @@ int contarLineas(FILE* f) {
         if ( linea[0] != '\n' )
             ++count;
     }
-    printf("%d lines\n",count);
     return count;
 }
 
@@ -44,6 +76,32 @@ void obtenerCentros(Nodo lista[], FILE* f) {
     }
     return;
 }
+
+void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[]) {
+    int count = 0;
+    FILE *file;
+    char str[BUFSIZ];
+    sprintf(str,"log_%s.txt",n);
+    file = fopen(str,"w");
+    if (file != NULL) {
+        fprintf(file,"Estado inicial: %d\n\n",i);
+        while(count < 480) {
+            if (i-c >= 0)
+                i = i -c;
+            else {
+                i = 0;
+                fprintf(file,"Tanque vacio: minuto %d\n\n",count);
+            }
+            ++count;
+            usleep(100*1000);
+        }
+        fclose(file);
+    } else {
+        perror("Error al crear el archivo");
+        exit(1);
+    }
+    return;
+}
 /*
  * test 
  */
@@ -61,63 +119,29 @@ int main(int argc, char** argv) {
     
     while(i < argc){
         char *temp = argv[i];
-        
-                if(strcmp(temp,"-n") == 0) {
-                    nombreBomba = argv[i+1];
-                }
-                
-                if(strcmp(temp,"-cp") == 0) {
-                    capacMax = atoi(argv[i+1]);
-                    while((capacMax < 38000) || (capacMax > 380000)){
-                        printf("Usage: La capacidad máxima debe ser un valor"
-                                " entre 38000 y 380000. Intente de nuevo: ");
-                        char temp[sizeof(long)];
-                        char *p;
-                        fgets(temp,sizeof(temp),stdin);
-                        if((p = strchr(temp, '\n')) != NULL){
-                            *p = '\0';
-                        }
-                        capacMax = atoi(temp);
-                        }
-                }
-                
-                if(strcmp(temp,"-i") == 0) {
-                    inventario = atoi(argv[i+1]);
-                }
-                
-                if(strcmp(temp,"-c") == 0) {
-                    consumo = atoi(argv[i+1]);
-                    while((consumo < 0) || (consumo > 1000)){
-                        printf("Usage: El consumo promedio debe ser un valor"
-                                " entre 0 y 1000. Intente de nuevo: ");
-                        char temp[sizeof(long)];
-                        char *p;
-                        fgets(temp,sizeof(temp),stdin);
-                        if((p = strchr(temp, '\n')) != NULL){
-                            *p = '\0';
-                        }
-                        consumo = atoi(temp);
-                        }
-                }
-                if(strcmp(temp,"-fc") == 0) {
-                    centros = argv[i+1];
-                }
+        if(strcmp(temp,"-n") == 0)
+            nombreBomba = argv[i+1];       
+        if(strcmp(temp,"-cp") == 0) 
+            capacMax = atoi(argv[i+1]);
+        if(strcmp(temp,"-i") == 0)
+            inventario = atoi(argv[i+1]);         
+        if(strcmp(temp,"-c") == 0) 
+            consumo = atoi(argv[i+1]);
+        if(strcmp(temp,"-fc") == 0) 
+            centros = argv[i+1];
+        if (strcmp(temp, "-n") != 0 &&
+                strcmp(temp, "-cp") != 0 &&
+                strcmp(temp, "-i") != 0 &&
+                strcmp(temp, "-c") != 0 &&
+                strcmp(temp, "-fc") != 0) {
+            printf("Usage: Argumento invalido %s\n",temp);
+            exit(1);
+        }
         i = i + 2;
     }
-    while((inventario < 0) || (inventario > capacMax)){
-        printf("Usage: El inventario debe tener un valor entre 0 y la capacidad "
-                "máxima. Intente de nuevo: ");
-        char temp[sizeof(long)];
-        char *p;
-        fgets(temp,sizeof(temp),stdin);
-        if((p = strchr(temp, '\n')) != NULL){
-                *p = '\0';
-        }
-        inventario = atoi(temp);
-    }    
     
-    printf("%s,%d,%d,%d,%s\n",nombreBomba,capacMax,inventario, consumo, centros);
-    
+        checkEntrada(&capacMax,&inventario,&consumo);
+        
     FILE *file = NULL;
     file = fopen(centros,"r");
     int numCentros = 0;
@@ -133,6 +157,9 @@ int main(int argc, char** argv) {
     Nodo listaCentros[numCentros];
     obtenerCentros(listaCentros,file);
     fclose(file);
+    
+    iniciarSimulacion(nombreBomba,capacMax,inventario,
+                        consumo,listaCentros);
     
     return (EXIT_SUCCESS);
 }

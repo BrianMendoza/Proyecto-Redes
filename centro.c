@@ -24,9 +24,9 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
         *cp = atoi(temp);
     }
     
-    while (0 > *i || *i > 3800000) {
+    while (0 > *i || *i > *cp) {
         printf("Usage: el inventario debe ser un valor"
-                        " entre 0 y 3800000. Intente de nuevo: ");
+                        " entre 0 y %d. Intente de nuevo: ",*cp);
         fgets(temp,sizeof(temp),stdin);
         if((p = strchr(temp, '\n')) != NULL)
                 *p = '\0';
@@ -60,20 +60,10 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
         *pt = atoi(temp);
     }
     
-    while (*cp < *i || *i < 0) {
-        if (*cp < *i)
-            printf("Inventario excede capacidad, intente de nuevo: ");
-        if (*i < 0)
-            printf("Inventario debe ser mayor a cero, intente de nuevo: ");
-        fgets(temp, sizeof(temp), stdin);
-        if ((p = strchr(temp, '\n')) != NULL)
-                *p = '\0';
-        *i = atoi(temp);
-    }
     return;
 }
 
-void iniciarSimulacion(char* n,int cp, int i, int t, int s, int p) {
+void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
     int count = 0;
     FILE *file;
     char str[BUFSIZ];
@@ -82,7 +72,7 @@ void iniciarSimulacion(char* n,int cp, int i, int t, int s, int p) {
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {
-            if (i+s < cp)
+            if (i+s <= cp)
                 i = i + s;
             else {
                 i = cp;
