@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 
 void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
@@ -69,6 +74,43 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
+
+    int sockfd,newsockfd,clilen,j;
+    struct sockaddr_in serv_addr, cli_addr;
+    
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+      perror("ERROR opening socket");
+      exit(1);
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(p);
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+      perror("ERROR on binding");
+      exit(1);
+    }
+    
+    listen(sockfd,5);
+    clilen = sizeof(cli_addr);
+    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+    if (newsockfd < 0) {
+      perror("ERROR on accept");
+      exit(1);
+    }
+    bzero(str,256);
+
+    int temp = htonl(t);
+    j = write(newsockfd,&temp,sizeof(temp));
+    if (j < 0) {
+        perror("ERROR writing to socket");
+        exit(1);
+    }
+    close(sockfd);
+    close(newsockfd);
+    printf("Socket done!\n");
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {

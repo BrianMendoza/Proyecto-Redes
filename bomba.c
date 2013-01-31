@@ -8,11 +8,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 typedef struct {
     char nombre[BUFSIZ];
     char direccion[BUFSIZ];
     int puerto;
+    int tiempoResp;
+    int sockfd;
 } Nodo;
 
 void checkEntrada(int *cp,int *i,int *c) {
@@ -83,6 +90,43 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[]) {
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
+    
+    int sockfd, j;
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("ERROR opening socket");
+        exit(1);
+    }
+    server = gethostbyname(lista[0].direccion);
+    if (server == NULL) {
+      fprintf(stderr,"ERROR, no such host");
+      exit(0);
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr,
+          (char *)&serv_addr.sin_addr.s_addr,
+          server->h_length);
+    serv_addr.sin_port = htons(lista[0].puerto);
+    
+    if (connect(sockfd,&serv_addr,sizeof(serv_addr)) < 0) {
+        perror("ERROR connecting");
+        exit(1);
+    }
+    
+    int tmp,buf;
+    j = read(sockfd,&buf,255);
+    if (j < 0) {
+        perror("ERROR reading from socket");
+        exit(1);
+    }
+    tmp = ntohl(buf);
+    printf("Tiempo: %d\n",tmp);
+    
+    close(sockfd);
+    printf("Socket done!\n");
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {
