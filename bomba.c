@@ -84,49 +84,70 @@ void obtenerCentros(Nodo lista[], FILE* f) {
     return;
 }
 
-void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[]) {
+void obtenerTiempos(Nodo lista[],int num) {
+    int i = 0;
+
+    while(i < num) {
+        int sockfd, j;
+        struct sockaddr_in serv_addr;
+        struct hostent *server;
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0) {
+            perror("ERROR opening socket");
+            exit(1);
+        }
+        server = gethostbyname(lista[i].direccion);
+        if (server == NULL) {
+            fprintf(stderr,"ERROR, no such host");
+            exit(0);
+        }
+        bzero((char *) &serv_addr, sizeof(serv_addr));
+        serv_addr.sin_family = AF_INET;
+        bcopy((char *)server->h_addr,
+              (char *)&serv_addr.sin_addr.s_addr,
+                                    server->h_length);
+        serv_addr.sin_port = htons(lista[i].puerto);
+    
+        if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
+            perror("ERROR connecting");
+            exit(1);
+        }
+    
+        int tmp,buf;
+        j = read(sockfd,&buf,sizeof(buf));
+        if (j < 0) {
+            perror("ERROR reading from socket");
+            exit(1);
+        }
+        tmp = ntohl(buf);
+        lista[i].tiempoResp = tmp;
+        printf("Tiempo: %d\n",tmp);
+    
+        close(sockfd);
+        printf("Socket done!\n");
+        ++i;
+    }
+    return;
+}
+
+int compararNodos(const void *e1, const void *e2) {
+
+    Nodo *n1 = (Nodo *)e1;
+    Nodo *n2 = (Nodo *)e2;
+    return ( n1->tiempoResp - n2->tiempoResp );
+}
+
+void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     int count = 0;
     FILE *file;
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
     
-    int sockfd, j;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        perror("ERROR opening socket");
-        exit(1);
-    }
-    server = gethostbyname(lista[0].direccion);
-    if (server == NULL) {
-      fprintf(stderr,"ERROR, no such host");
-      exit(0);
-    }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-          (char *)&serv_addr.sin_addr.s_addr,
-          server->h_length);
-    serv_addr.sin_port = htons(lista[0].puerto);
+    obtenerTiempos(lista,num);
+
+    qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
-    if (connect(sockfd,&serv_addr,sizeof(serv_addr)) < 0) {
-        perror("ERROR connecting");
-        exit(1);
-    }
-    
-    int tmp,buf;
-    j = read(sockfd,&buf,255);
-    if (j < 0) {
-        perror("ERROR reading from socket");
-        exit(1);
-    }
-    tmp = ntohl(buf);
-    printf("Tiempo: %d\n",tmp);
-    
-    close(sockfd);
-    printf("Socket done!\n");
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {
@@ -203,8 +224,7 @@ int main(int argc, char** argv) {
     fclose(file);
     
     iniciarSimulacion(nombreBomba,capacMax,inventario,
-                        consumo,listaCentros);
+                        consumo,listaCentros,numCentros);
     
     return (EXIT_SUCCESS);
 }
-
