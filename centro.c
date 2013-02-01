@@ -100,7 +100,6 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
       perror("ERROR on accept");
       exit(1);
     }
-    bzero(str,256);
 
     int temp = htonl(t);
     j = write(newsockfd,&temp,sizeof(temp));
@@ -108,9 +107,7 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
         perror("ERROR writing to socket");
         exit(1);
     }
-    close(sockfd);
-    close(newsockfd);
-    printf("Socket done!\n");
+
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {
@@ -128,6 +125,9 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
         perror("Error al crear el archivo");
         exit(1);
     }
+    close(sockfd);
+    close(newsockfd);
+    printf("Socket done!\n");
     return;
 }
 /*
