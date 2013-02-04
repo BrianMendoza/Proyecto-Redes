@@ -14,7 +14,11 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <pthread.h>
 
+int inventario = 0;
+int tiempo = 0;
+int puerto = 0;
 
 void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     char temp[2*sizeof(long)];
@@ -68,13 +72,7 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     return;
 }
 
-void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
-    int count = 0;
-    FILE *file;
-    char str[BUFSIZ];
-    sprintf(str,"log_%s.txt",n);
-    file = fopen(str,"w");
-
+void *manejarConexiones(void *param) {
     int sockfd,newsockfd,clilen,j;
     struct sockaddr_in serv_addr, cli_addr;
     
@@ -85,7 +83,7 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(p);
+    serv_addr.sin_port = htons(puerto);
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
@@ -93,28 +91,50 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
       exit(1);
     }
     
-    listen(sockfd,5);
+    listen(sockfd,10);
     clilen = sizeof(cli_addr);
-    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-    if (newsockfd < 0) {
-      perror("ERROR on accept");
-      exit(1);
+    while (newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
+        
+        if (newsockfd < 0) {
+          perror("ERROR on accept");
+          exit(1);
+        }  
     }
 
-    int temp = htonl(t);
+
+    int temp = htonl(tiempo);
     j = write(newsockfd,&temp,sizeof(temp));
     if (j < 0) {
         perror("ERROR writing to socket");
         exit(1);
+    close(sockfd);
+    close(newsockfd);
+    printf("Socket done!\n");
     }
 
+}
+
+void iniciarSimulacion(char *n,int cp, int s) {
+    int count = 0;
+    FILE *file;
+    char str[BUFSIZ];
+    sprintf(str,"log_%s.txt",n);
+    file = fopen(str,"w");
+    
+    pthread_t manejadorConexiones;
+    if (pthread_create( &manejadorConexiones, NULL, 
+                                manejarConexiones, (void *)NULL) < 0) {
+        perror("Error al crear hilo de conexiones");
+        exit(1);
+    }
+    
     if (file != NULL) {
-        fprintf(file,"Estado inicial: %d\n\n",i);
+        fprintf(file,"Estado inicial: %d\n\n",inventario);
         while(count < 480) {
-            if (i+s <= cp)
-                i = i + s;
+            if (inventario+s <= cp)
+                inventario = inventario + s;
             else {
-                i = cp;
+                inventario = cp;
                 fprintf(file,"Tanque full: minuto %d\n\n",count);
             }
             ++count;
@@ -125,9 +145,7 @@ void iniciarSimulacion(char *n,int cp, int i, int t, int s, int p) {
         perror("Error al crear el archivo");
         exit(1);
     }
-    close(sockfd);
-    close(newsockfd);
-    printf("Socket done!\n");
+
     return;
 }
 /*
@@ -140,10 +158,7 @@ int main(int argc, char** argv) {
                 }
         char *nombre;
         int capacidadMax = 0;
-        int inventario = 0;
-        int tiempo = 0;
         int suministro = 0;
-        int puerto = 0;
         
         int i = 1;
         char *temp;
@@ -176,8 +191,7 @@ int main(int argc, char** argv) {
         
         checkEntrada(&capacidadMax,&inventario,&tiempo,&suministro,&puerto);
         
-        iniciarSimulacion(nombre,capacidadMax,inventario,
-                                tiempo,suministro,puerto);
+        iniciarSimulacion(nombre,capacidadMax,suministro);
         
     return (EXIT_SUCCESS);
 }
