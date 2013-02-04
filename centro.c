@@ -72,6 +72,38 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     return;
 }
 
+void *conexion(void *socketfd) {
+    int socket = *(int*)socketfd;
+    int opc,tmp,j;
+    j = 0;
+    
+    read(socket, &tmp, sizeof(tmp));
+    
+    opc = ntohs(tmp);
+    
+    if (opc == 1) {
+        tmp = htons(tiempo);
+        j = write(socket,&tmp,sizeof(tmp));
+        if (j < 0) {
+            perror("ERROR writing to socket");
+            exit(1);
+        }
+        shutdown(socket,1);
+        int r = 0;
+        while (r = read(socket, &tmp, sizeof(tmp)) > 0) {}
+        close(socket);
+    }
+    
+    if (opc == 2) {
+/*Codigo de chequear inventario y mandar va aqui*/
+        while (j = read(socket, &tmp, sizeof(tmp)) > 0) {}
+        close(socket);
+    }
+    
+    free(socketfd);
+
+}
+
 void *manejarConexiones(void *param) {
     int sockfd,newsockfd,clilen,j;
     struct sockaddr_in serv_addr, cli_addr;
@@ -94,24 +126,21 @@ void *manejarConexiones(void *param) {
     listen(sockfd,10);
     clilen = sizeof(cli_addr);
     while (newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) {
-        
         if (newsockfd < 0) {
           perror("ERROR on accept");
           exit(1);
         }  
+        
+        pthread_t encargado;
+        int *new_sock;
+        new_sock = malloc(1);
+        *new_sock = newsockfd;
+        
+        if( pthread_create( &encargado, NULL,  conexion, (void*) new_sock) < 0) {
+            perror("ERROR on handler thread");
+            return 1;
+        }
     }
-
-
-    int temp = htonl(tiempo);
-    j = write(newsockfd,&temp,sizeof(temp));
-    if (j < 0) {
-        perror("ERROR writing to socket");
-        exit(1);
-    close(sockfd);
-    close(newsockfd);
-    printf("Socket done!\n");
-    }
-
 }
 
 void iniciarSimulacion(char *n,int cp, int s) {
