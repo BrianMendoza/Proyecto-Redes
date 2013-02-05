@@ -121,9 +121,9 @@ void obtenerTiempos(Nodo lista[],int num) {
             }
             rd = read(sockfd,&buf,sizeof(buf));
             lista[i].tiempoResp = ntohs(buf);
-            printf("Tiempo: %d\n",lista[i].tiempoResp);
             close(sockfd);
         }
+        printf("Tiempo: %d\n",lista[i].tiempoResp);
         ++i;
     }
     return;
