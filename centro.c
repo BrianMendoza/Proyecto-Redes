@@ -138,7 +138,7 @@ void *manejarConexiones(void *param) {
         
         if( pthread_create( &encargado, NULL,  conexion, (void*) new_sock) < 0) {
             perror("ERROR on handler thread");
-            return 1;
+            return;
         }
     }
 }
