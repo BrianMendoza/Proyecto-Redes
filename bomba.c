@@ -148,7 +148,10 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
     /*Falta codigo para darse cuenta que le falta combustible y llamar a los servidores
-     para que le manden*/
+     para que le manden
+     Se necesita una funcion que se de cuenta si un servidor tiene como tiempo int_max,
+     que representa que no estaba disponible en la primera pasada, y si esta vez contesta 
+     hacer otro quicksort de la lista con el nuevo tiempo*/
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count <= 480) {
