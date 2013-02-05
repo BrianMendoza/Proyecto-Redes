@@ -89,8 +89,8 @@ void *conexion(void *socketfd) {
             exit(1);
         }
         shutdown(socket,1);
-        int r = 0;
-        while (r = read(socket, &tmp, sizeof(tmp)) > 0) {}
+        int rd = 0;
+        while (rd = read(socket, &tmp, sizeof(tmp)) > 0) {}
         close(socket);
     }
     

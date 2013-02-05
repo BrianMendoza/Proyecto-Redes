@@ -13,14 +13,13 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <pthread.h>
+#include <limits.h>
 
 typedef struct {
     char nombre[BUFSIZ];
     char direccion[BUFSIZ];
     int puerto;
     int tiempoResp;
-    int sockfd;
 } Nodo;
 
 void checkEntrada(int *cp,int *i,int *c) {
@@ -89,7 +88,7 @@ void obtenerTiempos(Nodo lista[],int num) {
     int i = 0;
 
     while(i < num) {
-        int sockfd, j;
+        int sockfd, rd;
         struct sockaddr_in serv_addr;
         struct hostent *server;
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -110,22 +109,21 @@ void obtenerTiempos(Nodo lista[],int num) {
         serv_addr.sin_port = htons(lista[i].puerto);
     
         if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
-            perror("ERROR connecting");
-            exit(1);
+            lista[i].tiempoResp = INT_MAX;
         }
-    
-        int tmp,buf;
-        j = read(sockfd,&buf,sizeof(buf));
-        if (j < 0) {
-            perror("ERROR reading from socket");
-            exit(1);
+        else {
+            int buf,wr;
+            buf = htons(1);
+            wr = write(sockfd,&buf,sizeof(buf));
+            if (wr < 0) {
+                perror("ERROR writing to socket");
+                exit(1);
+            }
+            rd = read(sockfd,&buf,sizeof(buf));
+            lista[i].tiempoResp = ntohs(buf);
+            printf("Tiempo: %d\n",buf);
+            close(sockfd);
         }
-        tmp = ntohl(buf);
-        lista[i].tiempoResp = tmp;
-        printf("Tiempo: %d\n",tmp);
-    
-        close(sockfd);
-        printf("Socket done!\n");
         ++i;
     }
     return;
@@ -149,6 +147,8 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
 
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
+    /*Falta codigo para darse cuenta que le falta combustible y llamar a los servidores
+     para que le manden*/
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
         while(count < 480) {
