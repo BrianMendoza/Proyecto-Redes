@@ -144,7 +144,7 @@ void *manejarConexiones(void *param) {
 }
 
 void iniciarSimulacion(char *n,int cp, int s) {
-    int count = 0;
+    int count = 1;
     FILE *file;
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
@@ -159,7 +159,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
     
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",inventario);
-        while(count < 480) {
+        while(count <= 480) {
             if (inventario+s <= cp)
                 inventario = inventario + s;
             else {

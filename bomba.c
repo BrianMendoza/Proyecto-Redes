@@ -121,7 +121,7 @@ void obtenerTiempos(Nodo lista[],int num) {
             }
             rd = read(sockfd,&buf,sizeof(buf));
             lista[i].tiempoResp = ntohs(buf);
-            printf("Tiempo: %d\n",buf);
+            printf("Tiempo: %d\n",lista[i].tiempoResp);
             close(sockfd);
         }
         ++i;
@@ -137,7 +137,7 @@ int compararNodos(const void *e1, const void *e2) {
 }
 
 void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
-    int count = 0;
+    int count = 1;
     FILE *file;
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
@@ -151,7 +151,7 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
      para que le manden*/
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
-        while(count < 480) {
+        while(count <= 480) {
             if (i-c >= 0)
                 i = i -c;
             else {
