@@ -18,10 +18,12 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 int inventario = 0;
 int tiempo = 0;
 int puerto = 0;
+int count = 1;
 FILE *file;
 pthread_mutex_t miMutex;
 
@@ -79,29 +81,63 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
 
 void *conexion(void *socketfd) {
     int socket = *(int*)socketfd;
-    int opc,tmp,j;
-    j = 0;
+    int opc,tmp,wr,rd;
     
-    read(socket, &tmp, sizeof(tmp));
-    
+    rd = read(socket, &tmp, sizeof(tmp));
+    if (rd < 0) {
+        perror("ERROR reading from socket");
+        exit(1);
+    }    
     opc = ntohs(tmp);
     
     if (opc == 1) {
         tmp = htons(tiempo);
-        j = write(socket,&tmp,sizeof(tmp));
-        if (j < 0) {
+        wr = write(socket,&tmp,sizeof(tmp));
+        if (wr < 0) {
             perror("ERROR writing to socket");
             exit(1);
         }
         shutdown(socket,1);
-        int rd = 0;
         while (rd = read(socket, &tmp, sizeof(tmp)) > 0) {}
         close(socket);
     }
     
     if (opc == 2) {
-/*Codigo de chequear inventario y mandar va aqui*/
-        while (j = read(socket, &tmp, sizeof(tmp)) > 0) {}
+        bool ok;
+        pthread_mutex_lock (&miMutex);
+        if (inventario >= 38000)
+            ok = true;
+        else
+            ok = false;
+        if (ok == true) {
+            tmp = htons(1);
+            wr = write(socket,&tmp,sizeof(tmp));
+            if (wr < 0) {
+                perror("ERROR writing to socket");
+                exit(1);
+            }
+            inventario = inventario - 38000;
+            if (inventario == 0)
+              fprintf(file,"Tanque vacio: minuto %d\n\n",count);  
+        }
+        else {
+            tmp = htons(2);
+            wr = write(socket,&tmp,sizeof(tmp));
+            if (wr < 0) {
+                perror("ERROR writing to socket");
+                exit(1);
+            }
+        }
+        char cliente[40];
+        bzero(cliente,40);
+        rd = read(socket, cliente, 40);
+        if (rd < 0) {
+            perror("ERROR reading from socket");
+            exit(1);
+        }
+        fprintf(file,"Suministro: minuto %d, %s, %s, %d\n\n",count,cliente,
+                                       (ok) ? "aceptado" : "negado",inventario);
+        pthread_mutex_unlock (&miMutex);
         close(socket);
     }
     
@@ -149,7 +185,6 @@ void *manejarConexiones(void *param) {
 }
 
 void iniciarSimulacion(char *n,int cp, int s) {
-    int count = 1;
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
@@ -164,6 +199,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",inventario);
         while(count <= 480) {
+            pthread_mutex_lock (&miMutex);
             if (inventario+s <= cp)
                 inventario = inventario + s;
             else {
@@ -171,6 +207,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
                 fprintf(file,"Tanque full: minuto %d\n\n",count);
             }
             ++count;
+            pthread_mutex_unlock (&miMutex);
             usleep(100*1000);
         }
         fclose(file);
@@ -181,9 +218,8 @@ void iniciarSimulacion(char *n,int cp, int s) {
 
     return;
 }
-/*
- * test
- */
+
+
 int main(int argc, char** argv) {
         if ( argc != 13) {
                 	printf("Usage: Numero de argumentos invalidos\n");
