@@ -3,6 +3,9 @@
  * Author: brian_m
  *
  * Created on January 26, 2013, 11:16 PM
+ * 
+ * pthread_mutex_lock (&miMutex);
+ * pthread_mutex_unlock (&miMutex);
  */
 
 #include <stdio.h>
@@ -19,6 +22,8 @@
 int inventario = 0;
 int tiempo = 0;
 int puerto = 0;
+FILE *file;
+pthread_mutex_t miMutex;
 
 void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     char temp[2*sizeof(long)];
@@ -145,7 +150,6 @@ void *manejarConexiones(void *param) {
 
 void iniciarSimulacion(char *n,int cp, int s) {
     int count = 1;
-    FILE *file;
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
@@ -219,7 +223,7 @@ int main(int argc, char** argv) {
         }
         
         checkEntrada(&capacidadMax,&inventario,&tiempo,&suministro,&puerto);
-        
+        pthread_mutex_init(&miMutex, NULL);
         iniciarSimulacion(nombre,capacidadMax,suministro);
         
     return (EXIT_SUCCESS);
