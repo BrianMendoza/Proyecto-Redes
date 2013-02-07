@@ -16,7 +16,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-bool faltan_tiempos = false;
 
 typedef struct {
     char nombre[BUFSIZ];
@@ -87,7 +86,7 @@ void obtenerCentros(Nodo lista[], FILE* f) {
     return;
 }
 
-void obtenerTiempos(Nodo lista[],int num) {
+bool obtenerTiempos(Nodo lista[],int num) {
     int i = 0;
     int counter = 0;
 
@@ -131,10 +130,9 @@ void obtenerTiempos(Nodo lista[],int num) {
         ++i;
     }
     if (counter != num -1)
-        faltan_tiempos = true;
+        return true;
     else
-        faltan_tiempos = false;
-    return;
+        return false;
 }
 
 int compararNodos(const void *e1, const void *e2) {
@@ -211,8 +209,8 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
-    
-    obtenerTiempos(lista,num);
+    bool faltan_tiempos = false;
+    faltan_tiempos = obtenerTiempos(lista,num);
 
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
@@ -252,7 +250,7 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
             }
             if (count == timer) {
                 if (faltan_tiempos) {
-                    obtenerTiempos(lista,num);
+                    faltan_tiempos = obtenerTiempos(lista,num);
                     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
                 }
                 countdown = pedirGasolina(lista,num,n,file,count);
