@@ -18,8 +18,8 @@
 
 
 typedef struct {
-    char nombre[BUFSIZ];
-    char direccion[BUFSIZ];
+    char nombre[40];
+    char direccion[40];
     int puerto;
     int tiempoResp;
 } Nodo;
@@ -74,11 +74,11 @@ void obtenerCentros(Nodo lista[], FILE* f) {
     char * pch;
     while (fgets(str, sizeof(str), f) != NULL) {
         if ( str[0] != '\n' ) {
-                pch = strtok (str,"&&");
+                pch = strtok (str,"&");
                 sprintf(lista[i].nombre,"%s",pch);
-                pch = strtok (NULL, "&&");
+                pch = strtok (NULL, "&");
                 sprintf(lista[i].direccion,"%s",pch);
-                pch = strtok (NULL, "&&");
+                pch = strtok (NULL, "&");
                 lista[i].puerto = atoi(pch);
                 ++i;
         }
@@ -170,6 +170,7 @@ int pedirGasolina(Nodo lista[], int num, char *name, FILE *file, int count) {
         serv_addr.sin_port = htons(lista[i].puerto);
         
         if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
+            fprintf(file,"Peticion: %d minutos, %s, Sin Respuesta\n\n",count,lista[i].nombre);
             ++i;
             continue;
         }
@@ -191,11 +192,11 @@ int pedirGasolina(Nodo lista[], int num, char *name, FILE *file, int count) {
             while (rd = read(sockfd, &buf, sizeof(buf)) > 0) {}
             close(sockfd);
             if (res == 1) {
-                fprintf(file,"Peticion: minuto %d, %s, aceptado\n\n",count,lista[i].nombre);
+                fprintf(file,"Peticion: %d minutos, %s, OK\n\n",count,lista[i].nombre);
                 return lista[i].tiempoResp;
             }
             else {
-                fprintf(file,"Peticion: minuto %d, %s, denegado\n\n",count,lista[i].nombre);
+                fprintf(file,"Peticion: %d minutos, %s, Sin Inventario\n\n",count,lista[i].nombre);
             }
         }
         ++i;
@@ -226,13 +227,13 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     bool chequeo = false;
     
     if (file != NULL) {
-        fprintf(file,"Estado inicial: %d\n\n",i);
+        fprintf(file,"Inventario inicial: %d litros\n\n",i);
         while(count < 480) {
             if (count == countdown) {
-                fprintf(file,"Llegada de gandola: minuto %d, 38000\n\n",count);
+                fprintf(file,"Llegada de gandola: %d minutos, 38000 litros\n\n",count);
                 i = i + 38000;
                 if (i == cp)
-                    fprintf(file,"Tanque full: minuto %d\n\n",count);
+                    fprintf(file,"Tanque full: %d minutos\n\n",count);
                 chequeo = false;
                 peticion_hecha = false;
 /*
@@ -249,7 +250,7 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
             else {
                 i = 0;
                 if (chequeo == false){
-                        fprintf(file,"Tanque vacio: minuto %d\n\n",count);
+                        fprintf(file,"Tanque vacio: %d minutos\n\n",count);
                         chequeo = true;
                 }
             }

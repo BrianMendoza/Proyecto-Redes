@@ -4,8 +4,6 @@
  *
  * Created on January 26, 2013, 11:16 PM
  * 
- * pthread_mutex_lock (&miMutex);
- * pthread_mutex_unlock (&miMutex);
  */
 
 #include <stdio.h>
@@ -137,8 +135,8 @@ void *conexion(void *socketfd) {
             perror("ERROR reading from socket");
             exit(1);
         }
-        fprintf(file,"Suministro: minuto %d, %s, %s, %d\n\n",count,cliente,
-                                       (ok) ? "aceptado" : "negado",inventario);
+        fprintf(file,"Suministro: %d minutos, %s, %s, %d litros\n\n",count,cliente,
+                                       (ok) ? "OK" : "Sin Inventario",inventario);
         pthread_mutex_unlock (&miMutex);
         close(socket);
     }
@@ -199,7 +197,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
     }
     
     if (file != NULL) {
-        fprintf(file,"Estado inicial: %d\n\n",inventario);
+        fprintf(file,"Inventario inicial: %d litros\n\n",inventario);
         while(count < 480) {
             pthread_mutex_lock (&miMutex);
             if (inventario+s <= cp)
@@ -207,7 +205,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
             else {
                 inventario = cp;
                 if (chequeo == false){
-                        fprintf(file,"Tanque full: minuto %d\n\n",count);
+                        fprintf(file,"Tanque full: %d minutos\n\n",count);
                         chequeo = true;
                 }
             }
