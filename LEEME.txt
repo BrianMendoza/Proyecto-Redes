@@ -1,0 +1,38 @@
+Proyecto 1
+Redes 1
+CI-4835
+Grupo 33
+Diana Vainberg 07-41618
+Brian-Marcial Mendoza 07-41206
+
+Para el diseño del centro se tomo la decision de que el programa
+principal se encargue de la simulacion como tal y de cuentas simples
+como por ejemplo sumarle al inventario el suministro de cada minuto. 
+Y a su vez hay un hilo funcionando en paralelo que se encarga de
+recibir las conexiones de las distintas bombas y luego por cada
+peticion crea un hilo encargado para que efectivamente haya concurrencia
+en el manejo de todas las peticiones.
+
+Para el diseño de la bomba se tomo la decision de que el programa
+principal se encargue de la simulacion y las peticiones. En un 
+principio se abre el archivo de entrada para contar cuantos centros
+van a estar disponibles para luego poder inicializar un arreglo
+para almacenar la informacion de cada centro. Se decidio utilizar arreglos
+puesto que nos facilitaria el acceso a la informacion de los centros
+cuando sea necesario hacer conexiones para peticiones. Cada nodo
+(la estructura que almacena el nombre, direccion, puerto y tiempo de
+respuesta) inicializa su tiempo en -1 para facilitar la actualizacion 
+de tiempos. Antes de iniciar la simulacion se hace una primera pasada
+por todos los centros pidiendo sus tiempos de respuesta. Si uno no contesta
+se le pone la constante INT_MAX, esto se hace porque cada Nodo debe
+tener un valor para poder hacer el ordenamiento, y decidimos poner
+los que no contestaron al final de la lista hasta que contesten con sus tiempos.
+Cada vez que necesite conectarse para pedir gasolina se pregunta de nuevo
+a los servidores sus tiempos si en la primera pasada hubo uno que no contesto.
+Valores ya obtenidos no son sobreescritos.
+
+El protocolo que manejamos para la comunicacion centro-bomba es el siguiente:
+Si el centro recibe un 1, es un peticion de su tiempo. Si recibe un 2 es una
+peticion de gasolina. En el caso de que sea una peticion de gasolina, el centro
+contesta con un 1 si tiene inventario disponible para mandar y un 2 en caso
+contrario.

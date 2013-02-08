@@ -20,6 +20,10 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+
+/*
+ * Variables globales.
+ */
 int inventario = 0;
 int tiempo = 0;
 int puerto = 0;
@@ -28,6 +32,13 @@ bool chequeo = false;
 FILE *file;
 pthread_mutex_t miMutex;
 
+
+/*
+ * Metodo donde se hace el chequeo de los parametros de entrada. 
+ * cp es la capacidad maxima, i es el inventario, t es el tiempo 
+ * de respuesta, s es la tasa de suministro de la refineria, pt 
+ * es el puerto del centro. 
+ */
 void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     char temp[2*sizeof(long)];
     char *p;
@@ -80,6 +91,12 @@ void checkEntrada(int *cp,int *i,int *t,int *s,int *pt) {
     return;
 }
 
+/*
+ * Metodo que permite realizar la conexion entre un centro y una bomba
+ * mediante el uso de sockets. Se utiliza un mutex para evitar que dos
+ * hilos que manejan distintas bombas modifiquen variables globales al
+ * mismo tiempo. El hilo maneja pedidos de tiempo y de gasolina.
+ */
 void *conexion(void *socketfd) {
     int socket = *(int*)socketfd;
     int opc,tmp,wr,rd;
@@ -91,6 +108,8 @@ void *conexion(void *socketfd) {
     }    
     opc = ntohs(tmp);
     
+    //Si la opcion es 1, la bomba pidio el tiempo de respuesta, si es 2 pidio
+    //una gandola con gasolina.
     if (opc == 1) {
         tmp = htons(tiempo);
         wr = write(socket,&tmp,sizeof(tmp));
@@ -98,18 +117,23 @@ void *conexion(void *socketfd) {
             perror("ERROR writing to socket");
             exit(1);
         }
+        //Cierre seguro del socket para garantizar que no haya mas informacion
+        //en el
         shutdown(socket,1);
         while (rd = read(socket, &tmp, sizeof(tmp)) > 0) {}
         close(socket);
     }
     
     if (opc == 2) {
+        //Si tiene inventario la respuesta a la bomba es 1, si no hay inventario
+        //la respuesta es 2
         bool ok;
         pthread_mutex_lock (&miMutex);
         if (inventario >= 38000)
             ok = true;
         else
             ok = false;
+        
         if (ok == true) {
             tmp = htons(1);
             wr = write(socket,&tmp,sizeof(tmp));
@@ -130,6 +154,8 @@ void *conexion(void *socketfd) {
                 exit(1);
             }
         }
+        
+        //Obtiene el nombre de la bomba que hizo la peticion
         char cliente[40];
         bzero(cliente,40);
         rd = read(socket, cliente, 40);
@@ -137,8 +163,8 @@ void *conexion(void *socketfd) {
             perror("ERROR reading from socket");
             exit(1);
         }
-        fprintf(file,"Suministro: %d minutos, %s, %s, %d litros\n\n",count,cliente,
-                                       (ok) ? "OK" : "Sin Inventario",inventario);
+        fprintf(file,"Suministro: %d minutos, %s, %s, %d litros\n\n",count,
+                             cliente,(ok) ? "OK" : "Sin Inventario",inventario);
         pthread_mutex_unlock (&miMutex);
         close(socket);
     }
@@ -146,11 +172,17 @@ void *conexion(void *socketfd) {
     free(socketfd);
 
 }
-
+/*
+ * Metodo en el que se crea un socket que escucha las peticiones de
+ * tiempo y de gasolina de las bombas, y por cada peticion, crea un
+ * hilo, que va a crear un nuevo socket, para conectarse con la bomba
+ * que haya hecho el pedido y manejar su peticion.
+ */
 void *manejarConexiones(void *param) {
     int sockfd,newsockfd,clilen,j;
     struct sockaddr_in serv_addr, cli_addr;
     
+    //Setup del socket principal
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
       perror("ERROR opening socket");
@@ -173,7 +205,7 @@ void *manejarConexiones(void *param) {
           perror("ERROR on accept");
           exit(1);
         }  
-        
+        //Se crea el hilo encargado de la peticion de la bomba
         pthread_t encargado;
         int *new_sock;
         new_sock = malloc(1);
@@ -186,11 +218,18 @@ void *manejarConexiones(void *param) {
     }
 }
 
+/*
+ * Este metodo se utiliza para realizar la simulacion de 480 "minutos" 
+ * en la que se manejan las conexiones con las bombas que hagan pedidos, 
+ * y se escriben los eventos relevantes en el archivo de log. n es el 
+ * nombre del centro, cp es la capacidad maxima, s es la tasa de suministro 
+ * de la refineria.
+ */
 void iniciarSimulacion(char *n,int cp, int s) {
     char str[BUFSIZ];
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
-    
+    //Se crea el hilo manejador de conexiones
     pthread_t manejadorConexiones;
     if (pthread_create( &manejadorConexiones, NULL, 
                                 manejarConexiones, (void *)NULL) < 0) {
@@ -224,7 +263,10 @@ void iniciarSimulacion(char *n,int cp, int s) {
     return;
 }
 
-
+/*
+ * Funcion principal que toma los parametros de entrada, llama a la funcion
+ * que realiza el chequeo de los mismos y comienza la simulacion. 
+ */
 int main(int argc, char** argv) {
         if ( argc != 13) {
                 	printf("Usage: Numero de argumentos invalidos\n");
