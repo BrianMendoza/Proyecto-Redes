@@ -1,6 +1,8 @@
 /* 
  * File:   centro.c
- * Author: brian_m
+ * Grupo 33
+ * Diana Vainberg 07-41618
+ * Brian-Marcial Mendoza 07-41206
  *
  * Created on January 26, 2013, 11:16 PM
  * 

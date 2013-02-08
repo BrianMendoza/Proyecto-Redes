@@ -1,8 +1,11 @@
 /* 
- * File:   bomba.c
- * Author: brian_m
+ * File:   centro.c
+ * Grupo 33
+ * Diana Vainberg 07-41618
+ * Brian-Marcial Mendoza 07-41206
  *
- * Created on January 26, 2013, 10:09 PM
+ * Created on January 26, 2013, 11:16 PM
+ * 
  */
 
 #include <stdio.h>
