@@ -148,7 +148,6 @@ void *conexion(void *socketfd) {
 }
 
 void *manejarConexiones(void *param) {
-    usleep(300*1000);
     int sockfd,newsockfd,clilen,j;
     struct sockaddr_in serv_addr, cli_addr;
     

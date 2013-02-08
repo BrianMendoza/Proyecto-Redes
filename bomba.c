@@ -215,7 +215,6 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
     bool faltan_tiempos = false;
-    bool peticion_hecha = false;
     faltan_tiempos = obtenerTiempos(lista,num);
 
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
@@ -241,7 +240,6 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
                 if (i == cp)
                     fprintf(file,"Tanque full: %d minutos\n\n",count);
                 chequeo = false;
-                peticion_hecha = false;
 
                 capac_ocio = cp - i;
                 cons_neces = 38000 - capac_ocio;
@@ -253,15 +251,14 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
 
                 tiempo_gandola = -1;
             }
-            if (count == tiempo_a_peticion /*cp-i >= 38000 && !peticion_hecha*/) {
+            if (count == tiempo_a_peticion) {
                 if (faltan_tiempos) {
                     faltan_tiempos = obtenerTiempos(lista,num);
                     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
                 }
                 tiempo_gandola = pedirGasolina(lista,num,n,file,count);
                 if (tiempo_gandola != -1) {
-                    tiempo_gandola = tiempo_gandola + count/*timer*/;
-                    /*peticion_hecha = true;*/
+                    tiempo_gandola = tiempo_gandola + count;
                 }
             }
             if (i-c > 0)
