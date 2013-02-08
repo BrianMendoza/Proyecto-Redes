@@ -210,22 +210,20 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
     sprintf(str,"log_%s.txt",n);
     file = fopen(str,"w");
     bool faltan_tiempos = false;
+    bool peticion_hecha = false;
     faltan_tiempos = obtenerTiempos(lista,num);
 
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
-    /*Falta codigo para darse cuenta que le falta combustible y llamar a los servidores
-     para que le manden
-     Se necesita una funcion que se de cuenta si un servidor tiene como tiempo int_max,
-     que representa que no estaba disponible en la primera pasada, y si esta vez contesta 
-     hacer otro quicksort de la lista con el nuevo tiempo*/
-    
+/*
     int capac_ocio = cp - i;
     int cons_neces = 38000 - capac_ocio;
     int timer = cons_neces / c;
     if (timer < 0)
         timer = count;
+*/
     int countdown = -1;
+    bool chequeo = false;
     
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",i);
@@ -235,27 +233,36 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
                 i = i + 38000;
                 if (i == cp)
                     fprintf(file,"Tanque full: minuto %d\n\n",count);
+                chequeo = false;
+                peticion_hecha = false;
+/*
                 capac_ocio = cp - i;
                 cons_neces = 38000 - capac_ocio;
                 timer = timer + cons_neces / c;
                 if (timer < 0)
                     timer = count;
+*/
                 countdown = -1;
             }
-            if (i-c >= 0)
+            if (i-c > 0)
                 i = i -c;
             else {
                 i = 0;
-                fprintf(file,"Tanque vacio: minuto %d\n\n",count);
+                if (chequeo == false){
+                        fprintf(file,"Tanque vacio: minuto %d\n\n",count);
+                        chequeo = true;
+                }
             }
-            if (count == timer) {
+            if (/*count == timer*/ cp-i >= 38000 && !peticion_hecha) {
                 if (faltan_tiempos) {
                     faltan_tiempos = obtenerTiempos(lista,num);
                     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
                 }
                 countdown = pedirGasolina(lista,num,n,file,count);
-                if (countdown != -1)
-                    countdown = countdown + timer;
+                if (countdown != -1) {
+                    countdown = countdown + count/*timer*/;
+                    peticion_hecha = true;
+                }
             }
             ++count;
             usleep(100*1000);

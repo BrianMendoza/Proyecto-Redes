@@ -23,7 +23,8 @@
 int inventario = 0;
 int tiempo = 0;
 int puerto = 0;
-int count = 1;
+int count = 0;
+bool chequeo = false;
 FILE *file;
 pthread_mutex_t miMutex;
 
@@ -119,6 +120,7 @@ void *conexion(void *socketfd) {
             inventario = inventario - 38000;
             if (inventario == 0)
               fprintf(file,"Tanque vacio: minuto %d\n\n",count);  
+            chequeo = false;
         }
         else {
             tmp = htons(2);
@@ -198,13 +200,16 @@ void iniciarSimulacion(char *n,int cp, int s) {
     
     if (file != NULL) {
         fprintf(file,"Estado inicial: %d\n\n",inventario);
-        while(count <= 480) {
+        while(count < 480) {
             pthread_mutex_lock (&miMutex);
             if (inventario+s <= cp)
                 inventario = inventario + s;
             else {
                 inventario = cp;
-                fprintf(file,"Tanque full: minuto %d\n\n",count);
+                if (chequeo == false){
+                        fprintf(file,"Tanque full: minuto %d\n\n",count);
+                        chequeo = true;
+                }
             }
             ++count;
             pthread_mutex_unlock (&miMutex);
@@ -224,7 +229,7 @@ int main(int argc, char** argv) {
         if ( argc != 13) {
                 	printf("Usage: Numero de argumentos invalidos\n");
                 	exit(1);
-                }
+        }
         char *nombre;
         int capacidadMax = 0;
         int suministro = 0;
