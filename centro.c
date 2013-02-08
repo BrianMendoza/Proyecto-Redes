@@ -146,6 +146,7 @@ void *conexion(void *socketfd) {
 }
 
 void *manejarConexiones(void *param) {
+    usleep(300*1000);
     int sockfd,newsockfd,clilen,j;
     struct sockaddr_in serv_addr, cli_addr;
     
@@ -200,7 +201,7 @@ void iniciarSimulacion(char *n,int cp, int s) {
         fprintf(file,"Inventario inicial: %d litros\n\n",inventario);
         while(count < 480) {
             pthread_mutex_lock (&miMutex);
-            if (inventario+s <= cp)
+            if (inventario+s < cp)
                 inventario = inventario + s;
             else {
                 inventario = cp;

@@ -112,7 +112,8 @@ bool obtenerTiempos(Nodo lista[],int num) {
         serv_addr.sin_port = htons(lista[i].puerto);
     
         if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
-            lista[i].tiempoResp = INT_MAX;
+            if (lista[i].tiempoResp == -1)
+                lista[i].tiempoResp = INT_MAX;
         }
         else {
             int buf,wr;
@@ -216,34 +217,49 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
 
     qsort((void *) lista, num, sizeof(Nodo), compararNodos);
     
-/*
+
     int capac_ocio = cp - i;
     int cons_neces = 38000 - capac_ocio;
-    int timer = cons_neces / c;
-    if (timer < 0)
-        timer = count;
-*/
-    int countdown = -1;
+    int tiempo_mas_rapido = lista[0].tiempoResp;
+    int tiempo_a_espacio = (cons_neces / c) + 1;
+    int tiempo_a_peticion = tiempo_a_espacio - tiempo_mas_rapido;
+    if (tiempo_a_peticion < 0)
+        tiempo_a_peticion = count;
+
+    int tiempo_gandola = -1;
     bool chequeo = false;
     
     if (file != NULL) {
         fprintf(file,"Inventario inicial: %d litros\n\n",i);
         while(count < 480) {
-            if (count == countdown) {
+            if (count == tiempo_gandola) {
                 fprintf(file,"Llegada de gandola: %d minutos, 38000 litros\n\n",count);
                 i = i + 38000;
                 if (i == cp)
                     fprintf(file,"Tanque full: %d minutos\n\n",count);
                 chequeo = false;
                 peticion_hecha = false;
-/*
+
                 capac_ocio = cp - i;
                 cons_neces = 38000 - capac_ocio;
-                timer = timer + cons_neces / c;
-                if (timer < 0)
-                    timer = count;
-*/
-                countdown = -1;
+                tiempo_a_espacio = count + (cons_neces / c) + 1;
+                tiempo_mas_rapido = lista[0].tiempoResp;
+                tiempo_a_peticion = tiempo_a_espacio - tiempo_mas_rapido;
+                if (tiempo_a_peticion < 0)
+                    tiempo_a_peticion = count;
+
+                tiempo_gandola = -1;
+            }
+            if (count == tiempo_a_peticion /*cp-i >= 38000 && !peticion_hecha*/) {
+                if (faltan_tiempos) {
+                    faltan_tiempos = obtenerTiempos(lista,num);
+                    qsort((void *) lista, num, sizeof(Nodo), compararNodos);
+                }
+                tiempo_gandola = pedirGasolina(lista,num,n,file,count);
+                if (tiempo_gandola != -1) {
+                    tiempo_gandola = tiempo_gandola + count/*timer*/;
+                    /*peticion_hecha = true;*/
+                }
             }
             if (i-c > 0)
                 i = i -c;
@@ -254,17 +270,7 @@ void iniciarSimulacion(char *n,int cp,int i,int c,Nodo lista[],int num) {
                         chequeo = true;
                 }
             }
-            if (/*count == timer*/ cp-i >= 38000 && !peticion_hecha) {
-                if (faltan_tiempos) {
-                    faltan_tiempos = obtenerTiempos(lista,num);
-                    qsort((void *) lista, num, sizeof(Nodo), compararNodos);
-                }
-                countdown = pedirGasolina(lista,num,n,file,count);
-                if (countdown != -1) {
-                    countdown = countdown + count/*timer*/;
-                    peticion_hecha = true;
-                }
-            }
+
             ++count;
             usleep(100*1000);
         }
@@ -330,6 +336,12 @@ int main(int argc, char** argv) {
     Nodo listaCentros[numCentros];
     obtenerCentros(listaCentros,file);
     fclose(file);
+    
+    int j;
+    
+    for (j = 0; j < numCentros; j++) {
+        listaCentros[j].tiempoResp = -1;
+    }
     
     iniciarSimulacion(nombreBomba,capacMax,inventario,
                         consumo,listaCentros,numCentros);
